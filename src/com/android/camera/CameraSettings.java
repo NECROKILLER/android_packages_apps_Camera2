@@ -79,10 +79,8 @@ public class CameraSettings {
     public static final String KEY_VIDEO_DURATION = "pref_camera_video_duration_key";
     public static final String KEY_POWER_MODE = "pref_camera_powermode_key";
     public static final String KEY_PICTURE_FORMAT = "pref_camera_pictureformat_key";
-    public static final String KEY_ZSL = "pref_camera_zsl_key";
     public static final String KEY_COLOR_EFFECT = "pref_camera_coloreffect_key";
     public static final String KEY_FACE_DETECTION = "pref_camera_facedetection_key";
-    public static final String KEY_TOUCH_AF_AEC = "pref_camera_touchafaec_key";
     public static final String KEY_SELECTABLE_ZONE_AF = "pref_camera_selectablezoneaf_key";
     public static final String KEY_SATURATION = "pref_camera_saturation_key";
     public static final String KEY_CONTRAST = "pref_camera_contrast_key";
@@ -284,10 +282,8 @@ public class CameraSettings {
     private void qcomInitPreferences(PreferenceGroup group){
         //Qcom Preference add here
         ListPreference powerMode = group.findPreference(KEY_POWER_MODE);
-        ListPreference zsl = group.findPreference(KEY_ZSL);
         ListPreference colorEffect = group.findPreference(KEY_COLOR_EFFECT);
         ListPreference faceDetection = group.findPreference(KEY_FACE_DETECTION);
-        ListPreference touchAfAec = group.findPreference(KEY_TOUCH_AF_AEC);
         ListPreference selectableZoneAf = group.findPreference(KEY_SELECTABLE_ZONE_AF);
         ListPreference saturation = group.findPreference(KEY_SATURATION);
         ListPreference contrast = group.findPreference(KEY_CONTRAST);
@@ -304,11 +300,6 @@ public class CameraSettings {
         ListPreference jpegQuality = group.findPreference(KEY_JPEG_QUALITY);
         ListPreference videoSnapSize = group.findPreference(KEY_VIDEO_SNAPSHOT_SIZE);
         ListPreference pictureFormat = group.findPreference(KEY_PICTURE_FORMAT);
-
-        if (touchAfAec != null) {
-            filterUnsupportedOptions(group,
-                    touchAfAec, mParameters.getSupportedTouchAfAec());
-        }
 
         if (!mParameters.isPowerModeSupported() && powerMode != null) {
             removePreference(group, powerMode.getKey());
@@ -377,15 +368,18 @@ public class CameraSettings {
                     pictureFormat, getSupportedPictureFormatLists());
         }
 
-        if (contrast != null && !CameraUtil.isSupported(mParameters, "contrast")) {
+        if (contrast != null && !CameraUtil.isSupported(mParameters, "contrast") &&
+                !CameraUtil.isSupported(mParameters, "contrast-max")) {
             removePreference(group, contrast.getKey());
         }
 
-        if (sharpness != null && !CameraUtil.isSupported(mParameters, "sharpness")) {
+        if (sharpness != null && !CameraUtil.isSupported(mParameters, "sharpness") &&
+                !CameraUtil.isSupported(mParameters, "sharpness-max")) {
             removePreference(group, sharpness.getKey());
         }
 
-        if (saturation != null && !CameraUtil.isSupported(mParameters, "saturation")) {
+        if (saturation != null && !CameraUtil.isSupported(mParameters, "saturation") &&
+                !CameraUtil.isSupported(mParameters, "saturation-max")) {
             removePreference(group, saturation.getKey());
         }
     }
@@ -735,6 +729,10 @@ public class CameraSettings {
     }
     private static boolean checkSupportedVideoQuality(Parameters parameters,int width, int height){
         List <Size> supported = parameters.getSupportedVideoSizes();
+        if (supported == null) {
+            // video-size not specified in parameter list. just go along with the profile.
+            return true;
+        }
         int flag = 0;
         for (Size size : supported){
             //since we are having two profiles with same height, we are checking with height
@@ -759,7 +757,7 @@ public class CameraSettings {
         ArrayList<String> supported = new ArrayList<String>();
         // Check for supported quality
         if (ApiHelper.HAS_FINE_RESOLUTION_QUALITY_LEVELS) {
-        getFineResolutionQuality(supported,cameraId,parameters);
+            getFineResolutionQuality(supported,cameraId,parameters);
         } else {
             supported.add(Integer.toString(CamcorderProfile.QUALITY_HIGH));
             CamcorderProfile high = CamcorderProfile.get(

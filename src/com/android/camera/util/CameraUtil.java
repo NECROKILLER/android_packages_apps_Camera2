@@ -40,6 +40,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -117,12 +118,18 @@ public class CameraUtil {
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 
+    private static boolean sEnableZSL;
+
     // Fields for the show-on-maps-functionality
     private static final String MAPS_PACKAGE_NAME = "com.google.android.apps.maps";
     private static final String MAPS_CLASS_NAME = "com.google.android.maps.MapsActivity";
 
     /** Has to be in sync with the receiving MovieActivity. */
     public static final String KEY_TREAT_UP_AS_BACK = "treat-up-as-back";
+
+    public static boolean isZSLEnabled() {
+        return sEnableZSL;
+    }
 
     public static boolean isSupported(String value, List<String> supported) {
         return supported == null ? false : supported.indexOf(value) >= 0;
@@ -164,8 +171,16 @@ public class CameraUtil {
         return (params.get(key) != null && !"null".equals(params.get(key)));
     }
 
-    public static boolean isBurstSupported(Parameters params) {
-        return isSupported(params, "num-snaps-per-shutter");
+    public static int getNumSnapsPerShutter(Parameters params) {
+        String numJpegs = params.get("num-jpegs-per-shutter");
+        if (!TextUtils.isEmpty(numJpegs)) {
+            return Integer.valueOf(numJpegs);
+        }
+        String numSnaps = params.get("num-snaps-per-shutter");
+        if (!TextUtils.isEmpty(numSnaps)) {
+            return Integer.valueOf(numSnaps);
+        }
+        return 1;
     }
 
     // Private intent extras. Test only.
@@ -186,6 +201,7 @@ public class CameraUtil {
         sPixelDensity = metrics.density;
         sImageFileNamer = new ImageFileNamer(
                 context.getString(R.string.image_file_name_format));
+        sEnableZSL = context.getResources().getBoolean(R.bool.enableZSL);
     }
 
     public static int dpToPixel(int dp) {
@@ -429,6 +445,12 @@ public class CameraUtil {
             case Surface.ROTATION_270: return 270;
         }
         return 0;
+    }
+
+    public static boolean isScreenRotated(Activity activity) {
+        int rotation = activity.getWindowManager().getDefaultDisplay()
+                .getRotation();
+        return rotation != Surface.ROTATION_0 && rotation != Surface.ROTATION_180;
     }
 
     /**
