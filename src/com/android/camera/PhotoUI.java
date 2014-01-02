@@ -72,7 +72,7 @@ public class PhotoUI implements PieListener,
     CameraManager.CameraFaceDetectionCallback {
 
     private static final String TAG = "CAM_UI";
-	private static final String PERSIST_LONG_ENABLE = "persist.camera.longshot.enable";
+    private static final String PERSIST_LONG_ENABLE = "persist.camera.longshot.enable";
     private static final int DOWN_SAMPLE_FACTOR = 4;
     private final AnimationManager mAnimationManager;
     private CameraActivity mActivity;

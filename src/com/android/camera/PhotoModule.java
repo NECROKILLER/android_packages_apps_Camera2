@@ -721,6 +721,9 @@ public class PhotoModule
             s.setListener(this);
         }
         mNamedImages = new NamedImages();
+        if (!mIsImageCaptureIntent) {
+            mUI.showSwitcher();
+        }
         mUI.initializeSecondTime(mParameters);
         keepMediaProviderInstance();
     }
@@ -1591,9 +1594,9 @@ public class PhotoModule
     public void onShutterButtonLongClick() {
         if ((null != mCameraDevice) && ((mCameraState == IDLE) || (mCameraState == FOCUSING))) {
             mLongshotSave = SystemProperties.getBoolean(PERSIST_LONG_SAVE, false);
-			mCameraDevice.setLongshot(true);
-			setCameraState(PhotoController.LONGSHOT);
-			mFocusManager.doSnap();
+            mCameraDevice.setLongshot(true);
+            setCameraState(PhotoController.LONGSHOT);
+            mFocusManager.doSnap();
         }
     }
 

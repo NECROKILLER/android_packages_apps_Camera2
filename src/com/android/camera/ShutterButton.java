@@ -66,8 +66,8 @@ public class ShutterButton extends ImageView {
     public void setOnShutterButtonListener(OnShutterButtonListener listener, boolean longClick) {
         mListener = listener;
         if (longClick) {
-			setOnLongClickListener(mLongClick);
-		}
+            setOnLongClickListener(mLongClick);
+        }
     }
 
     @Override
